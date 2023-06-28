@@ -1,0 +1,20 @@
+---
+
+- name: Fail if required influxdb settings not defined
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) for using this role.
+  when: "vars[item] == ''"
+  with_items:
+    - influxdb_hostname
+
+- name: Fail when not all inital settings are missing
+  ansible.builtin.fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) to correctly set up a initial user, organization and bucket.
+  when: "influxdb_init and vars[item] == ''"
+  with_items:
+    - influxdb_init_username
+    - influxdb_init_password
+    - influxdb_init_org
+    - influxdb_init_bucket

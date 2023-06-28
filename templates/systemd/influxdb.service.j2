@@ -1,0 +1,45 @@
+[Unit]
+Description=influxdb time-series database ({{ influxdb_identifier }})
+{% for service in influxdb_systemd_required_services_list %}
+Requires={{ service }}
+After={{ service }}
+{% endfor %}
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ influxdb_identifier }} 2>/dev/null || true'
+ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ influxdb_identifier }} 2>/dev/null || true'
+
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
+                --rm \
+                --name={{ influxdb_identifier }} \
+                --log-driver=none \
+                --user={{ influxdb_uid }}:{{ influxdb_gid }} \
+                --cap-drop=ALL \
+                --read-only \
+                {% if influxdb_container_http_host_bind_port %}
+                -p {{ influxdb_container_http_host_bind_port }}:{{ influxdb_container_http_port }} \
+                {% endif %}
+                --label-file={{ influxdb_config_path }}/labels \
+                --network={{ influxdb_container_network }} \
+                --mount type=bind,src={{ influxdb_data_path }},dst=/var/lib/influxdb2 \
+                --mount type=bind,src={{ influxdb_config_path }},dst=/etc/influxdb2 \
+                --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
+                --env-file={{ influxdb_env_path }} \
+                {{ influxdb_container_image }}
+
+{% for network in influxdb_container_additional_networks %}
+ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ influxdb_identifier }}
+{% endfor %}
+
+ExecStart={{ devture_systemd_docker_base_host_command_docker }} start --attach {{ influxdb_identifier }}
+
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ influxdb_identifier }} 2>/dev/null || true'
+ExecStop=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ influxdb_identifier }} 2>/dev/null || true'
+Restart=always
+RestartSec=30
+SyslogIdentifier={{ influxdb_identifier }}
+
+[Install]
+WantedBy=multi-user.target

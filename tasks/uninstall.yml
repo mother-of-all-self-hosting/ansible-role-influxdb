@@ -1,0 +1,23 @@
+---
+
+- name: Check existence of influxdb systemd service
+  ansible.builtin.stat:
+    path: "{{ devture_systemd_docker_base_systemd_path }}/{{ influxdb_identifier }}.service"
+  register: influxdb_service_stat
+
+- when: influxdb_service_stat.stat.exists | bool
+  block:
+    - name: Ensure influxdb service is stopped
+      ansible.builtin.service:
+        name: "{{ influxdb_identifier }}"
+        state: stopped
+        daemon_reload: true
+    - name: Ensure influxdb service doesn't exist
+      ansible.builtin.file:
+        dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ influxdb_identifier }}.service"
+        state: absent
+
+    - name: Ensure influxdb base path is files deleted (make sure to delete node data)
+      ansible.builtin.file:
+        path: "{{ influxdb_base_path }}"
+        state: absent

@@ -1,0 +1,56 @@
+---
+
+- name: Ensure influxdb network is created in Docker
+  community.docker.docker_network:
+    name: "{{ influxdb_container_network }}"
+    driver: bridge
+
+
+- name: Ensure influxdb path exists
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0700
+    owner: "{{ influxdb_uid }}"
+    group: "{{ influxdb_gid }}"
+  with_items:
+    - {path: "{{ influxdb_base_path }}", when: true}
+    - {path: "{{ influxdb_config_path }}", when: true}
+
+- name: Ensure influxdb data path exists
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0755
+    owner: "{{ influxdb_uid }}"
+    group: "{{ influxdb_gid }}"
+  with_items:
+    - {path: "{{ influxdb_data_path }}", when: true}
+
+
+- name: Ensure influxdb traefik labels are installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/labels.j2"
+    dest: "{{ influxdb_config_path }}/labels"
+    owner: "{{ influxdb_uid }}"
+    group: "{{ influxdb_gid }}"
+    mode: 0640
+
+- name: Ensure influxdb configuration is deployed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/env.j2"
+    dest: "{{ influxdb_config_path }}/env"
+    owner: "{{ influxdb_uid }}"
+    group: "{{ influxdb_gid }}"
+    mode: 0640
+
+- name: Ensure influxdb container image is pulled
+  community.docker.docker_image:
+    name: "{{ influxdb_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+
+- name: Ensure influxdb.service installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/influxdb.service.j2"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ influxdb_identifier }}.service"
+    mode: 0644
