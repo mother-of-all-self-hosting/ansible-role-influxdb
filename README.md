@@ -1,6 +1,6 @@
 # Influxdb Ansible Role
 
-influxdb is a self-hosted time-series database. This role helps you to set up influxdb:
+[influxdb](https://www.influxdata.com/) is a self-hosted time-series database. This role helps you to set up influxdb:
 
 - with everything run in [Docker](https://www.docker.com/) containers
 - powered by [the official influxdb container image](https://hub.docker.com/r/superseriousbusiness/influxdb/)

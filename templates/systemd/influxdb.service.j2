@@ -24,7 +24,6 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 --label-file={{ influxdb_config_path }}/labels \
                 --network={{ influxdb_container_network }} \
                 --mount type=bind,src={{ influxdb_data_path }},dst=/var/lib/influxdb2 \
-                --mount type=bind,src={{ influxdb_config_path }},dst=/etc/influxdb2 \
                 --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
                 --env-file={{ influxdb_env_path }} \
                 {{ influxdb_container_image }}
