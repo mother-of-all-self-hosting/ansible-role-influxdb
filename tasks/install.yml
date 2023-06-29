@@ -1,11 +1,5 @@
 ---
 
-- name: Ensure influxdb network is created in Docker
-  community.docker.docker_network:
-    name: "{{ influxdb_container_network }}"
-    driver: bridge
-
-
 - name: Ensure influxdb path exists
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -27,7 +21,6 @@
   with_items:
     - {path: "{{ influxdb_data_path }}", when: true}
 
-
 - name: Ensure influxdb traefik labels are installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/labels.j2"
@@ -43,6 +36,11 @@
     owner: "{{ influxdb_uid }}"
     group: "{{ influxdb_gid }}"
     mode: 0640
+
+- name: Ensure influxdb network is created in Docker
+  community.docker.docker_network:
+    name: "{{ influxdb_container_network }}"
+    driver: bridge
 
 - name: Ensure influxdb container image is pulled
   community.docker.docker_image:
