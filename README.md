@@ -22,6 +22,10 @@ influxdb_hostname: 'example.org'
 To bootstrap an initial user, bucket and organization you can use
 
 ```yaml
+# Configure the inital user, organization and bucket
+# This setting will only be used once upon initial installation of influxdb. Changing this values after the first
+# start of influxdb will have no effect.
+# Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.
 influxdb_init: true
 influxdb_init_username: "USERNAME"
 influxdb_init_password: "SUPERSECRETPASSWORD"

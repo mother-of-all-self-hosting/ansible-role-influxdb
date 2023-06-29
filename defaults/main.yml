@@ -49,7 +49,9 @@ influxdb_container_http_host_bind_port: ""
 influxdb_container_additional_networks: []
 
 # Configure the inital user, organization and bucket
-# Not required but useful
+# This setting will only be used once upon initial installation of influxdb. Changing this values after the first
+# start of influxdb will have no effect.
+# Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.
 influxdb_init: false
 influxdb_init_username: ''
 influxdb_init_password: ''
