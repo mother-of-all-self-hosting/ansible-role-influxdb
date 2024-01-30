@@ -37,7 +37,9 @@ influxdb_container_http_host_bind_port: ""
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
 # Use this to expose this container to a reverse proxy, which runs in a different container network.
-influxdb_container_additional_networks: []
+influxdb_container_additional_networks: "{{ influxdb_container_additional_networks_auto + influxdb_container_additional_networks_custom }}"
+influxdb_container_additional_networks_auto: []
+influxdb_container_additional_networks_custom: []
 
 # Configure the inital user, organization and bucket
 # This setting will only be used once upon initial installation of influxdb. Changing this values after the first
