@@ -1,5 +1,7 @@
 ---
 
+# Project source code URL: https://github.com/influxdata/influxdb
+
 influxdb_enabled: true
 influxdb_identifier: influxdb
 
