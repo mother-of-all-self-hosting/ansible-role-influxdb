@@ -11,6 +11,10 @@ Type=simple
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} kill {{ influxdb_identifier }} 2>/dev/null || true'
 ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_systemd_docker_base_host_command_docker }} rm {{ influxdb_identifier }} 2>/dev/null || true'
 
+{#
+    When influxdb_init is enabled, InfluxDB tries to write some configs to /etc/influxdb2,
+    so we mount a fully-writable tmpfs there.
+#}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 --rm \
                 --name={{ influxdb_identifier }} \
@@ -25,6 +29,7 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 --network={{ influxdb_container_network }} \
                 --mount type=bind,src={{ influxdb_data_path }},dst=/var/lib/influxdb2 \
                 --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
+                --tmpfs=/etc/influxdb2:rw,noexec,nosuid,size=100m,mode=1777 \
                 --env-file={{ influxdb_env_path }} \
                 {{ influxdb_container_image }}
 
