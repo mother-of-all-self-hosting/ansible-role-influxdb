@@ -20,7 +20,7 @@ influxdb_systemd_required_services_list_default: ['docker.service']
 influxdb_systemd_required_services_list_auto: []
 influxdb_systemd_required_services_list_custom: []
 
-influxdb_version: 2.7.5
+influxdb_version: 2.7.6
 
 influxdb_container_image: "{{ influxdb_container_image_registry_prefix }}library/influxdb:{{ influxdb_container_image_tag }}"
 influxdb_container_image_registry_prefix: docker.io/
