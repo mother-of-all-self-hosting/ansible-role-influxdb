@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Influxdb Ansible Role
 
 [influxdb](https://www.influxdata.com/) is a self-hosted time-series database. This role helps you to set up influxdb:
