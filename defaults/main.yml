@@ -14,6 +14,7 @@
 influxdb_enabled: true
 influxdb_identifier: influxdb
 
+# The hostname at which InfluxDB is served.
 influxdb_hostname: ''
 
 influxdb_uid: ''
@@ -40,6 +41,7 @@ influxdb_container_image_registry_prefix_upstream: "{{ influxdb_container_image_
 influxdb_container_image_registry_prefix_upstream_default: docker.io/
 influxdb_container_image_force_pull: "{{ influxdb_container_image.endswith(':latest') }}"
 
+# The base container network. It will be auto-created by this role if it doesn't exist already.
 influxdb_container_network: '{{ influxdb_identifier }}'
 
 # The port number in the container
