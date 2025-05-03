@@ -13,6 +13,9 @@ Description=InfluxDB time-series database ({{ influxdb_identifier }})
 Requires={{ service }}
 After={{ service }}
 {% endfor %}
+{% for service in influxdb_systemd_wanted_services_list %}
+Wants={{ service }}
+{% endfor %}
 DefaultDependencies=no
 
 [Service]

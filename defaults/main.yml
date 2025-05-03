@@ -1,4 +1,9 @@
 # SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+# SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
+# SPDX-FileCopyrightText: 2025 MASH project contributors
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -21,6 +26,9 @@ influxdb_systemd_required_services_list: "{{ influxdb_systemd_required_services_
 influxdb_systemd_required_services_list_default: ['docker.service']
 influxdb_systemd_required_services_list_auto: []
 influxdb_systemd_required_services_list_custom: []
+
+# List of systemd services that the InfluxDB systemd service wants
+influxdb_systemd_wanted_services_list: []
 
 influxdb_version: 2.7.6
 
