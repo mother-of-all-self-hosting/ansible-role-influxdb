@@ -4,7 +4,7 @@
 
 ---
 
-- name: Ensure influxdb path exists
+- name: Ensure InfluxDB path exists
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
@@ -15,7 +15,7 @@
     - {path: "{{ influxdb_base_path }}", when: true}
     - {path: "{{ influxdb_config_path }}", when: true}
 
-- name: Ensure influxdb data path exists
+- name: Ensure InfluxDB data path exists
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
@@ -25,7 +25,7 @@
   with_items:
     - {path: "{{ influxdb_data_path }}", when: true}
 
-- name: Ensure influxdb traefik labels are installed
+- name: Ensure InfluxDB traefik labels are installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/labels.j2"
     dest: "{{ influxdb_config_path }}/labels"
@@ -33,7 +33,7 @@
     group: "{{ influxdb_gid }}"
     mode: 0640
 
-- name: Ensure influxdb configuration is deployed
+- name: Ensure InfluxDB configuration is deployed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/env.j2"
     dest: "{{ influxdb_config_path }}/env"
@@ -41,12 +41,12 @@
     group: "{{ influxdb_gid }}"
     mode: 0640
 
-- name: Ensure influxdb network is created in Docker
+- name: Ensure InfluxDB network is created in Docker
   community.docker.docker_network:
     name: "{{ influxdb_container_network }}"
     driver: bridge
 
-- name: Ensure influxdb container image is pulled
+- name: Ensure InfluxDB container image is pulled
   community.docker.docker_image:
     name: "{{ influxdb_container_image }}"
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"

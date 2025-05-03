@@ -36,7 +36,7 @@ influxdb_container_network: '{{ influxdb_identifier }}'
 # The port number in the container
 influxdb_container_http_port: 8086
 
-# Controls whether the influxdb container exposes its HTTP port (as defined by `influxdb_container_http_port`).
+# Controls whether the InfluxDB container exposes its HTTP port (as defined by `influxdb_container_http_port`).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8086"), or empty string to not expose.
 influxdb_container_http_host_bind_port: ""
@@ -50,7 +50,7 @@ influxdb_container_additional_networks_custom: []
 
 # Configure the inital user, organization and bucket
 # This setting will only be used once upon initial installation of influxdb. Changing this values after the first
-# start of influxdb will have no effect.
+# start of InfluxDB will have no effect.
 # Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.
 influxdb_init: false
 influxdb_init_username: ''
@@ -58,7 +58,7 @@ influxdb_init_password: ''
 influxdb_init_org: ''
 influxdb_init_bucket: ''
 
-# Additional environment variables to pass to the influxdb container.
+# Additional environment variables to pass to the InfluxDB container.
 # You can use this to further influence the default configuration.
 #
 # Example:
