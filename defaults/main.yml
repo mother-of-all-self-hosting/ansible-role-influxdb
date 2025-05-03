@@ -15,9 +15,7 @@ influxdb_uid: ''
 influxdb_gid: ''
 
 influxdb_base_path: "/{{ influxdb_identifier }}"
-influxdb_config_path: "{{ influxdb_base_path }}/config"
 influxdb_data_path: "{{ influxdb_base_path }}/data"
-influxdb_env_path: "{{ influxdb_config_path }}/env"
 
 influxdb_systemd_required_services_list: "{{ influxdb_systemd_required_services_list_default + influxdb_systemd_required_services_list_auto + influxdb_systemd_required_services_list_custom }}"
 influxdb_systemd_required_services_list_default: ['docker.service']
