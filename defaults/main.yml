@@ -22,8 +22,9 @@ influxdb_gid: ''
 influxdb_base_path: "/{{ influxdb_identifier }}"
 influxdb_data_path: "{{ influxdb_base_path }}/data"
 
+# List of systemd services that the InfluxDB systemd service depends on
 influxdb_systemd_required_services_list: "{{ influxdb_systemd_required_services_list_default + influxdb_systemd_required_services_list_auto + influxdb_systemd_required_services_list_custom }}"
-influxdb_systemd_required_services_list_default: ['docker.service']
+influxdb_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 influxdb_systemd_required_services_list_auto: []
 influxdb_systemd_required_services_list_custom: []
 
