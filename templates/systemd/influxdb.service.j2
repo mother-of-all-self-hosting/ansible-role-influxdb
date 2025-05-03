@@ -1,5 +1,8 @@
 {#
 SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2024 Nikita Chernyi
+SPDX-FileCopyrightText: 2025 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
@@ -31,12 +34,12 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
                 {% if influxdb_container_http_host_bind_port %}
                 -p {{ influxdb_container_http_host_bind_port }}:{{ influxdb_container_http_port }} \
                 {% endif %}
-                --label-file={{ influxdb_config_path }}/labels \
+                --label-file={{ influxdb_base_path }}/labels \
                 --network={{ influxdb_container_network }} \
                 --mount type=bind,src={{ influxdb_data_path }},dst=/var/lib/influxdb2 \
                 --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
                 --tmpfs=/etc/influxdb2:rw,noexec,nosuid,size=100m,mode=1777 \
-                --env-file={{ influxdb_env_path }} \
+                --env-file={{ influxdb_base_path }}/env \
                 {{ influxdb_container_image }}
 
 {% for network in influxdb_container_additional_networks %}

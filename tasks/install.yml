@@ -1,4 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -13,7 +15,6 @@
     group: "{{ influxdb_gid }}"
   with_items:
     - {path: "{{ influxdb_base_path }}", when: true}
-    - {path: "{{ influxdb_config_path }}", when: true}
 
 - name: Ensure InfluxDB data path exists
   ansible.builtin.file:
@@ -25,21 +26,16 @@
   with_items:
     - {path: "{{ influxdb_data_path }}", when: true}
 
-- name: Ensure InfluxDB traefik labels are installed
+- name: Ensure InfluxDB support files installed
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/labels.j2"
-    dest: "{{ influxdb_config_path }}/labels"
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ influxdb_base_path }}/{{ item }}"
+    mode: "0640"
     owner: "{{ influxdb_uid }}"
     group: "{{ influxdb_gid }}"
-    mode: 0640
-
-- name: Ensure InfluxDB configuration is deployed
-  ansible.builtin.template:
-    src: "{{ role_path }}/templates/env.j2"
-    dest: "{{ influxdb_config_path }}/env"
-    owner: "{{ influxdb_uid }}"
-    group: "{{ influxdb_gid }}"
-    mode: 0640
+  with_items:
+    - env
+    - labels
 
 - name: Ensure InfluxDB network is created in Docker
   community.docker.docker_network:
