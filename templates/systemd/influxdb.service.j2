@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 #}
 
 [Unit]
-Description=influxdb time-series database ({{ influxdb_identifier }})
+Description=InfluxDB time-series database ({{ influxdb_identifier }})
 {% for service in influxdb_systemd_required_services_list %}
 Requires={{ service }}
 After={{ service }}
