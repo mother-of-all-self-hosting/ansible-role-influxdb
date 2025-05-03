@@ -8,7 +8,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 # Project source code URL: https://github.com/influxdata/influxdb
 
 influxdb_enabled: true
@@ -95,7 +94,6 @@ influxdb_container_labels_traefik_additional_request_headers: "{{ influxdb_conta
 influxdb_container_labels_traefik_additional_request_headers_auto: {}
 influxdb_container_labels_traefik_additional_request_headers_custom: {}
 
-
 # Controls which additional headers to attach to all HTTP responses.
 # To add your own custom response headers, use `influxdb_container_labels_traefik_additional_response_headers_custom`
 influxdb_container_labels_traefik_additional_response_headers: "{{ influxdb_container_labels_traefik_additional_response_headers_auto | combine(influxdb_container_labels_traefik_additional_response_headers_custom) }}"
@@ -156,7 +154,6 @@ influxdb_floc_optout_enabled: true
 # - https://hstspreload.org/#opt-in
 # See: `influxdb_http_header_strict_transport_security`
 influxdb_hsts_preload_enabled: false
-
 
 # influxdb_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
 # See `roles/custom/collabora_online/templates/labels.j2` for details.
