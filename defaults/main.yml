@@ -11,27 +11,18 @@
 # Project source code URL: https://github.com/influxdata/influxdb
 
 influxdb_enabled: true
-influxdb_identifier: influxdb
 
-# The hostname at which InfluxDB is served.
-influxdb_hostname: ''
+influxdb_identifier: influxdb
+influxdb_base_path: "/{{ influxdb_identifier }}"
+influxdb_data_path: "{{ influxdb_base_path }}/data"
+
+influxdb_version: 2.7.6
 
 influxdb_uid: ''
 influxdb_gid: ''
 
-influxdb_base_path: "/{{ influxdb_identifier }}"
-influxdb_data_path: "{{ influxdb_base_path }}/data"
-
-# List of systemd services that the InfluxDB systemd service depends on
-influxdb_systemd_required_services_list: "{{ influxdb_systemd_required_services_list_default + influxdb_systemd_required_services_list_auto + influxdb_systemd_required_services_list_custom }}"
-influxdb_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
-influxdb_systemd_required_services_list_auto: []
-influxdb_systemd_required_services_list_custom: []
-
-# List of systemd services that the InfluxDB systemd service wants
-influxdb_systemd_wanted_services_list: []
-
-influxdb_version: 2.7.6
+# The hostname at which InfluxDB is served.
+influxdb_hostname: ''
 
 influxdb_container_image: "{{ influxdb_container_image_registry_prefix }}library/influxdb:{{ influxdb_container_image_tag }}"
 influxdb_container_image_tag: "{{ influxdb_version }}"
@@ -40,16 +31,16 @@ influxdb_container_image_registry_prefix_upstream: "{{ influxdb_container_image_
 influxdb_container_image_registry_prefix_upstream_default: docker.io/
 influxdb_container_image_force_pull: "{{ influxdb_container_image.endswith(':latest') }}"
 
+# Controls whether the InfluxDB container exposes its HTTP port (as defined by `influxdb_container_http_port`).
+#
+# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8086"), or empty string to not expose.
+influxdb_container_http_host_bind_port: ""
+
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 influxdb_container_network: '{{ influxdb_identifier }}'
 
 # The port number in the container
 influxdb_container_http_port: 8086
-
-# Controls whether the InfluxDB container exposes its HTTP port (as defined by `influxdb_container_http_port`).
-#
-# Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:8086"), or empty string to not expose.
-influxdb_container_http_host_bind_port: ""
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
@@ -57,25 +48,6 @@ influxdb_container_http_host_bind_port: ""
 influxdb_container_additional_networks: "{{ influxdb_container_additional_networks_auto + influxdb_container_additional_networks_custom }}"
 influxdb_container_additional_networks_auto: []
 influxdb_container_additional_networks_custom: []
-
-# Configure the inital user, organization and bucket
-# This setting will only be used once upon initial installation of influxdb. Changing this values after the first
-# start of InfluxDB will have no effect.
-# Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.
-influxdb_init: false
-influxdb_init_username: ''
-influxdb_init_password: ''
-influxdb_init_org: ''
-influxdb_init_bucket: ''
-
-# Additional environment variables to pass to the InfluxDB container.
-# You can use this to further influence the default configuration.
-#
-# Example:
-# influxdb_environment_variables_extension: |
-#   INFLUXD_BOLT_PATH=/root/influxdb.bolt
-#   DOCKER_INFLUXDB_INIT_RETENTION=90d
-influxdb_environment_variables_extension: ''
 
 # influxdb_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
 # See `roles/custom/influxdb_influxdb/templates/labels.j2` for details.
@@ -107,6 +79,15 @@ influxdb_container_labels_traefik_additional_response_headers_auto: |
     | combine ({'Strict-Transport-Security': influxdb_http_header_strict_transport_security} if influxdb_http_header_strict_transport_security and influxdb_container_labels_traefik_tls else {})
   }}
 influxdb_container_labels_traefik_additional_response_headers_custom: {}
+
+# influxdb_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
+# See `roles/custom/collabora_online/templates/labels.j2` for details.
+#
+# Example:
+# influxdb_container_labels_additional_labels: |
+#   my.label=1
+#   another.label="here"
+influxdb_container_labels_additional_labels: ''
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
@@ -155,11 +136,30 @@ influxdb_floc_optout_enabled: true
 # See: `influxdb_http_header_strict_transport_security`
 influxdb_hsts_preload_enabled: false
 
-# influxdb_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `roles/custom/collabora_online/templates/labels.j2` for details.
+# List of systemd services that the InfluxDB systemd service depends on
+influxdb_systemd_required_services_list: "{{ influxdb_systemd_required_services_list_default + influxdb_systemd_required_services_list_auto + influxdb_systemd_required_services_list_custom }}"
+influxdb_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
+influxdb_systemd_required_services_list_auto: []
+influxdb_systemd_required_services_list_custom: []
+
+# List of systemd services that the InfluxDB systemd service wants
+influxdb_systemd_wanted_services_list: []
+
+# Configure the inital user, organization and bucket
+# This setting will only be used once upon initial installation of influxdb. Changing this values after the first
+# start of InfluxDB will have no effect.
+# Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.
+influxdb_init: false
+influxdb_init_username: ''
+influxdb_init_password: ''
+influxdb_init_org: ''
+influxdb_init_bucket: ''
+
+# Additional environment variables to pass to the InfluxDB container.
+# You can use this to further influence the default configuration.
 #
 # Example:
-# influxdb_container_labels_additional_labels: |
-#   my.label=1
-#   another.label="here"
-influxdb_container_labels_additional_labels: ''
+# influxdb_environment_variables_extension: |
+#   INFLUXD_BOLT_PATH=/root/influxdb.bolt
+#   DOCKER_INFLUXDB_INIT_RETENTION=90d
+influxdb_environment_variables_extension: ''
