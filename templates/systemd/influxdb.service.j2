@@ -25,22 +25,22 @@ ExecStartPre=-{{ devture_systemd_docker_base_host_command_sh }} -c '{{ devture_s
     so we mount a fully-writable tmpfs there.
 #}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
-                --rm \
-                --name={{ influxdb_identifier }} \
-                --log-driver=none \
-                --user={{ influxdb_uid }}:{{ influxdb_gid }} \
-                --cap-drop=ALL \
-                --read-only \
-                {% if influxdb_container_http_host_bind_port %}
-                -p {{ influxdb_container_http_host_bind_port }}:{{ influxdb_container_http_port }} \
-                {% endif %}
-                --label-file={{ influxdb_base_path }}/labels \
-                --network={{ influxdb_container_network }} \
-                --mount type=bind,src={{ influxdb_data_path }},dst=/var/lib/influxdb2 \
-                --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
-                --tmpfs=/etc/influxdb2:rw,noexec,nosuid,size=100m,mode=1777 \
-                --env-file={{ influxdb_base_path }}/env \
-                {{ influxdb_container_image }}
+      --rm \
+      --name={{ influxdb_identifier }} \
+      --log-driver=none \
+      --user={{ influxdb_uid }}:{{ influxdb_gid }} \
+      --cap-drop=ALL \
+      --read-only \
+      {% if influxdb_container_http_host_bind_port %}
+      -p {{ influxdb_container_http_host_bind_port }}:{{ influxdb_container_http_port }} \
+      {% endif %}
+      --label-file={{ influxdb_base_path }}/labels \
+      --network={{ influxdb_container_network }} \
+      --mount type=bind,src={{ influxdb_data_path }},dst=/var/lib/influxdb2 \
+      --tmpfs=/tmp:rw,noexec,nosuid,size=100m \
+      --tmpfs=/etc/influxdb2:rw,noexec,nosuid,size=100m,mode=1777 \
+      --env-file={{ influxdb_base_path }}/env \
+      {{ influxdb_container_image }}
 
 {% for network in influxdb_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ influxdb_identifier }}
