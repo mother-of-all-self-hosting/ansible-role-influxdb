@@ -16,6 +16,7 @@ influxdb_identifier: influxdb
 influxdb_base_path: "/{{ influxdb_identifier }}"
 influxdb_data_path: "{{ influxdb_base_path }}/data"
 
+# renovate: datasource=docker depName=library/influxdb versioning=semver
 influxdb_version: 2.7.6
 
 influxdb_uid: ''
