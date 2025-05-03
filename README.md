@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 [influxdb](https://www.influxdata.com/) is a self-hosted time-series database. This role helps you to set up influxdb:
 
 - with everything run in [Docker](https://www.docker.com/) containers
-- powered by [the official InfluxDB container image](https://hub.docker.com/r/superseriousbusiness/influxdb/)
+- powered by [the official InfluxDB container image](https://hub.docker.com/r/library/influxdb/)
 
 
 ## Installing
