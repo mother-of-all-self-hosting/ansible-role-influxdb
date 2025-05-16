@@ -160,7 +160,7 @@ influxdb_init_bucket: ''
 # You can use this to further influence the default configuration.
 #
 # Example:
-# influxdb_environment_variables_extension: |
+# influxdb_environment_variables_additional_variables: |
 #   INFLUXD_BOLT_PATH=/root/influxdb.bolt
 #   DOCKER_INFLUXDB_INIT_RETENTION=90d
-influxdb_environment_variables_extension: ''
+influxdb_environment_variables_additional_variables: ''
