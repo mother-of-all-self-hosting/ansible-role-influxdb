@@ -20,7 +20,7 @@ To configure and install InfluxDB on your own server(s), you should use a playbo
 
 ```
 influxdb_enabled: true
-influxdb_hostname: 'example.org'
+influxdb_hostname: 'example.com'
 ```
 
 ## Advanced configuration
