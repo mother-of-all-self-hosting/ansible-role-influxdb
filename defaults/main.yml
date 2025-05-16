@@ -51,7 +51,7 @@ influxdb_container_additional_networks_auto: []
 influxdb_container_additional_networks_custom: []
 
 # influxdb_container_labels_traefik_enabled controls whether labels to assist a Traefik reverse-proxy will be attached to the container.
-# See `roles/custom/influxdb_influxdb/templates/labels.j2` for details.
+# See `../templates/labels.j2` for details.
 #
 # To inject your own other container labels, see `influxdb_container_labels_additional_labels`.
 influxdb_container_labels_traefik_enabled: false
@@ -82,7 +82,7 @@ influxdb_container_labels_traefik_additional_response_headers_auto: |
 influxdb_container_labels_traefik_additional_response_headers_custom: {}
 
 # influxdb_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
-# See `roles/custom/collabora_online/templates/labels.j2` for details.
+# See `../templates/labels.j2` for details.
 #
 # Example:
 # influxdb_container_labels_additional_labels: |
