@@ -5,11 +5,14 @@
 
 ---
 
-- block:
-    - when: influxdb_enabled | bool
+- name: Perform InfluxDB installation tasks
+  block:
+    - name: Validate InfluxDB configuration
+      when: influxdb_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
 
-    - when: influxdb_enabled | bool
+    - name: Install InfluxDB
+      when: influxdb_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
   tags:
     - setup-all
@@ -17,8 +20,10 @@
     - install-all
     - install-influxdb
 
-- block:
-    - when: not influxdb_enabled | bool
+- name: Perform InfluxDB uninstallation tasks
+  block:
+    - name: Uninstall InfluxDB
+      when: not influxdb_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
   tags:
     - setup-all
