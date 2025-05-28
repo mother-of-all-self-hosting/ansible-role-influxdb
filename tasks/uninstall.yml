@@ -4,13 +4,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Check existence of InfluxDB systemd service
   ansible.builtin.stat:
     path: "{{ devture_systemd_docker_base_systemd_path }}/{{ influxdb_identifier }}.service"
   register: influxdb_service_stat
 
-- when: influxdb_service_stat.stat.exists | bool
+- name: Uninstall InfluxDB systemd services and files
+  when: influxdb_service_stat.stat.exists | bool
   block:
     - name: Ensure InfluxDB systemd service is stopped
       ansible.builtin.service:

@@ -146,7 +146,7 @@ influxdb_systemd_required_services_list_custom: []
 # List of systemd services that the InfluxDB systemd service wants
 influxdb_systemd_wanted_services_list: []
 
-# Configure the inital user, organization and bucket
+# Configure the initial user, organization and bucket
 # This setting will only be used once upon initial installation of influxdb. Changing this values after the first
 # start of InfluxDB will have no effect.
 # Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.

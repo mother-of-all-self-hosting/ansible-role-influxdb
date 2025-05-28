@@ -4,27 +4,25 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: Perform InfluxDB installation tasks
-  block:
-    - name: Validate InfluxDB configuration
-      when: influxdb_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-
-    - name: Install InfluxDB
-      when: influxdb_enabled | bool
-      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
   tags:
     - setup-all
     - setup-influxdb
     - install-all
     - install-influxdb
+  block:
+    - name: Validate InfluxDB configuration
+      when: influxdb_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
+    - name: Install InfluxDB
+      when: influxdb_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Perform InfluxDB uninstallation tasks
+  tags:
+    - setup-all
+    - setup-influxdb
   block:
     - name: Uninstall InfluxDB
       when: not influxdb_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
-  tags:
-    - setup-all
-    - setup-influxdb

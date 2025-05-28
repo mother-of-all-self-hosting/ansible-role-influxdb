@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-
 - name: (Deprecation) Catch and report renamed settings
   ansible.builtin.fail:
     msg: >-
@@ -12,7 +11,7 @@
       Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
   when: "item.old in vars"
   with_items:
-    - {'old': 'influxdb_environment_variables_extension', 'new': 'influxdb_environment_variables_additional_variables'}
+    - { "old": "influxdb_environment_variables_extension", "new": "influxdb_environment_variables_additional_variables" }
 
 - name: Fail if required InfluxDB settings not defined
   ansible.builtin.fail:
@@ -22,7 +21,7 @@
   with_items:
     - influxdb_hostname
 
-- name: Fail when not all inital settings are missing
+- name: Fail when not all initial settings are missing
   ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item }}`) to correctly set up a initial user, organization and bucket.
