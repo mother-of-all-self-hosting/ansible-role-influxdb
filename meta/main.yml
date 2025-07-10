@@ -1,8 +1,9 @@
 ---
 galaxy_info:
-  role_name: influxdb
   author: Julian-Samuel Gebühr
   company: Hyteck
+  role_name: influxdb
+  namespace: mash
   description: Ansible role to install influxdb, a time-series database
   platforms:
     - name: Debian
