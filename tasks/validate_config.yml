@@ -25,7 +25,7 @@
   ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item }}`) to correctly set up a initial user, organization and bucket.
-  when: "influxdb_init and vars[item] == ''"
+  when: "influxdb_init and lookup('vars', item, default='') | string | length == 0"
   with_items:
     - influxdb_init_username
     - influxdb_init_password
