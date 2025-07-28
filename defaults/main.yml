@@ -25,6 +25,8 @@ influxdb_gid: ''
 # The hostname at which InfluxDB is served.
 influxdb_hostname: ''
 
+influxdb_path_prefix: /
+
 influxdb_container_image: "{{ influxdb_container_image_registry_prefix }}library/influxdb:{{ influxdb_container_image_tag }}"
 influxdb_container_image_tag: "{{ influxdb_version }}"
 influxdb_container_image_registry_prefix: "{{ influxdb_container_image_registry_prefix_upstream }}"
@@ -54,10 +56,14 @@ influxdb_container_additional_networks_custom: []
 # See `../templates/labels.j2` for details.
 #
 # To inject your own other container labels, see `influxdb_container_labels_additional_labels`.
-influxdb_container_labels_traefik_enabled: false
-influxdb_container_labels_traefik_docker_network: ""
-influxdb_container_labels_traefik_entrypoints: web-secure
+influxdb_container_labels_traefik_enabled: true
+influxdb_container_labels_traefik_docker_network: "{{ influxdb_container_network }}"
+influxdb_container_labels_traefik_hostname: "{{ influxdb_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/influxdb`).
+influxdb_container_labels_traefik_path_prefix: "{{ influxdb_path_prefix }}"
+influxdb_container_labels_traefik_rule: "Host(`{{ influxdb_container_labels_traefik_hostname }}`){% if influxdb_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ influxdb_container_labels_traefik_path_prefix }}`){% endif %}"
 influxdb_container_labels_traefik_priority: 0
+influxdb_container_labels_traefik_entrypoints: web-secure
 influxdb_container_labels_traefik_tls: "{{ influxdb_container_labels_traefik_entrypoints != 'web' }}"
 influxdb_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 

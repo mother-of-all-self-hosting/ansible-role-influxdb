@@ -1,15 +1,29 @@
 {#
 SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
+SPDX-FileCopyrightText: 2023 Slavi Pantaleev
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
 
 {% if influxdb_container_labels_traefik_enabled %}
+traefik.enable=true
+
 {% if influxdb_container_labels_traefik_docker_network %}
 traefik.docker.network={{ influxdb_container_labels_traefik_docker_network }}
 {% endif %}
 
 {% set middlewares = [] %}
+
+{% if influxdb_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ influxdb_identifier }}-slashless-redirect.redirectregex.regex=({{ influxdb_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ influxdb_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
+{% set middlewares = middlewares + [influxdb_identifier + '-slashless-redirect'] %}
+{% endif %}
+
+{% if influxdb_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ influxdb_identifier }}-strip-prefix.stripprefix.prefixes={{ influxdb_container_labels_traefik_path_prefix }}
+{% set middlewares = middlewares + [influxdb_identifier + '-strip-prefix'] %}
+{% endif %}
 
 {% if influxdb_container_labels_traefik_additional_request_headers.keys() | length > 0 %}
 {% for name, value in influxdb_container_labels_traefik_additional_request_headers.items() %}
@@ -25,21 +39,21 @@ traefik.http.middlewares.{{ influxdb_identifier }}-add-response-headers.headers.
 {% set middlewares = middlewares + [influxdb_identifier + '-add-response-headers'] %}
 {% endif %}
 
-traefik.enable=true
-{% endif %}
-traefik.http.routers.{{ influxdb_identifier }}.rule=Host("{{ influxdb_hostname }}")
+traefik.http.routers.{{ influxdb_identifier }}.rule={{ influxdb_container_labels_traefik_rule }}
 {% if influxdb_container_labels_traefik_priority | int > 0 %}
 traefik.http.routers.{{ influxdb_identifier }}.priority={{ influxdb_container_labels_traefik_priority }}
 {% endif %}
+traefik.http.routers.{{ influxdb_identifier }}.service={{ influxdb_identifier }}
 {% if middlewares | length > 0 %}
 traefik.http.routers.{{ influxdb_identifier }}.middlewares={{ middlewares | join(',') }}
 {% endif %}
-traefik.http.routers.{{ influxdb_identifier }}.service={{ influxdb_identifier }}
 traefik.http.routers.{{ influxdb_identifier }}.entrypoints={{ influxdb_container_labels_traefik_entrypoints }}
 traefik.http.routers.{{ influxdb_identifier }}.tls={{ influxdb_container_labels_traefik_tls | to_json }}
 {% if influxdb_container_labels_traefik_tls %}
 traefik.http.routers.{{ influxdb_identifier }}.tls.certResolver={{ influxdb_container_labels_traefik_tls_certResolver }}
 {% endif %}
+
 traefik.http.services.{{ influxdb_identifier }}.loadbalancer.server.port={{ influxdb_container_http_port }}
+{% endif %}
 
 {{ influxdb_container_labels_additional_labels }}
