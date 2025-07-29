@@ -15,7 +15,7 @@ traefik.docker.network={{ influxdb_container_labels_traefik_docker_network }}
 {% set middlewares = [] %}
 
 {% if influxdb_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ influxdb_identifier }}-slashless-redirect.redirectregex.regex=({{ influxdb_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ influxdb_identifier }}-slashless-redirect.redirectregex.regex=^({{ influxdb_container_labels_traefik_path_prefix | quote }})$
 traefik.http.middlewares.{{ influxdb_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
 {% set middlewares = middlewares + [influxdb_identifier + '-slashless-redirect'] %}
 {% endif %}
