@@ -10,6 +10,7 @@ SPDX-FileCopyrightText: 2022 Julian Foad
 SPDX-FileCopyrightText: 2022 Warren Bailey
 SPDX-FileCopyrightText: 2023 Antonis Christofides
 SPDX-FileCopyrightText: 2023 Felix Stupp
+SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
 SPDX-FileCopyrightText: 2023 Pierre 'McFly' Marty
 SPDX-FileCopyrightText: 2024 - 2025 Suguru Hirahara
 
@@ -18,13 +19,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up InfluxDB
 
-This is an [Ansible](https://www.ansible.com/) role which installs [InfluxDB](https://github.com/httpjamesm/InfluxDB) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [InfluxDB](https://www.influxdata.com/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-InfluxDB allows you to view StackOverflow threads without exposing your IP address, browsing habits, and other browser fingerprinting data to the website.
+InfluxDB is a self-hosted time-series database.
 
-See the project's [documentation](https://github.com/httpjamesm/InfluxDB/blob/main/README.md) to learn what InfluxDB does and why it might be useful to you.
-
-[<img src="assets/home_dark.webp" title="Home screen in dark mode" width="600" alt="Home screen in dark mode">](assets/home_dark.webp) [<img src="assets/question_dark.webp" title="Question in dark mode" width="600" alt="Question in dark mode">](assets/question_dark.webp) [<img src="assets/answers_light.webp" title="Answer in light mode" width="600" alt="Answer in light mode">](assets/answers_light.webp)
+See the project's [documentation](https://github.com/docker-library/docs/blob/master/influxdb/README.md) to learn what InfluxDB does and why it might be useful to you.
 
 ## Adjusting the playbook configuration
 
@@ -58,7 +57,30 @@ influxdb_hostname: "example.com"
 
 After adjusting the hostname, make sure to adjust your DNS records to point the domain to your server.
 
-**Note**: hosting InfluxDB under a subpath (by configuring the `influxdb_path_prefix` variable) does not seem to be possible due to InfluxDB's technical limitations.
+### Configure the initial user (optional)
+
+You can set up the initial user by adding the following configuration to your `vars.yml` file:
+
+```yaml
+influxdb_init: true
+influxdb_init_username: YOUR_USERNAME_HERE
+influxdb_init_password: YOUR_PASSWORD_HERE
+influxdb_init_org: YOUR_EXAMPLE_ORG_HERE
+influxdb_init_bucket: YOUR_BUCKET_HERE
+```
+
+>[!NOTE]
+> The settings will only be used once upon initial installation of InfluxDB. Changing these values after the first start will have no effect.
+
+Not setting them allows you to create the user manually after installation by going to the hostname set to `influxdb_hostname`.
+
+### Expose the port for external services (optional)
+
+In order to let external services (like Proxmox or Grafana) access the InfluxDB's HTTP API, the corresponding port needs to be exposed.
+
+```yaml
+influxdb_container_http_host_bind_port: PORT_NUMBER_HERE
+```
 
 ### Extending the configuration
 
@@ -68,7 +90,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `influxdb_environment_variables_additional_variables` variable
 
-See its [`docker-compose.example.yml`](https://github.com/httpjamesm/InfluxDB/blob/main/docker-compose.example.yml) for a complete list of InfluxDB's config options that you could put in `influxdb_environment_variables_additional_variables`.
+See the [documentation](https://docs.influxdata.com/influxdb/v2/reference/config-options/) for a complete list of InfluxDB's config options that you could put in `influxdb_environment_variables_additional_variables`.
 
 ## Installing
 
@@ -82,11 +104,9 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 ## Usage
 
-After running the command for installation, InfluxDB becomes available at the specified hostname like `https://example.com`.
+After running the command for installation, the InfluxDB instance becomes available at the URL specified with `influxdb_hostname`. With the configuration above, the service is hosted at `https://influxdb.example.com`.
 
-[Libredirect](https://libredirect.github.io/), an extension for Firefox and Chromium-based desktop browsers, has support for redirections to InfluxDB. See [this section](https://github.com/httpjamesm/InfluxDB/blob/main/README.md#how-to-make-stack-overflow-links-take-you-to-influxdb-automatically) on the official documentation for more information.
-
-If you would like to make your instance public so that it can be used by anyone including Libredirect, please consider to send a PR to the [upstream project](https://github.com/httpjamesm/InfluxDB) to add yours to [`instances.json`](https://github.com/httpjamesm/InfluxDB/blob/main/instances.json), which Libredirect automatically fetches using a script (see [this FAQ entry](https://libredirect.github.io/faq.html#where_the_hell_are_those_instances_coming_from)).
+To get started, open the URL with a web browser, and log in to the service if `influxdb_init` is set to `true` (or configure the first user if it is not).
 
 ## Troubleshooting
 
