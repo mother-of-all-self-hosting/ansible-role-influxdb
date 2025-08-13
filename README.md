@@ -8,6 +8,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # InfluxDB Ansible role
 
+>[!WARNING]
+> This role is configured to install [InfluxDB OSS v2](https://docs.influxdata.com/influxdb/v2/). Though [InfluxDB 3 Core](https://docs.influxdata.com/influxdb3/core/) is open source, it is **not** a replacement for OSS v2. [InfluxDB 3 Enterprise](https://docs.influxdata.com/influxdb3/enterprise/) can replace OSS v2, but it is proprietary and we will not support it.
+
 This is an [Ansible](https://www.ansible.com/) role which installs [InfluxDB](https://www.influxdata.com/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 This role *implicitly* depends on:
