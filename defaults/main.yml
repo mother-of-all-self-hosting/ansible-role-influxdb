@@ -19,11 +19,11 @@ influxdb_data_path: "{{ influxdb_base_path }}/data"
 # renovate: datasource=docker depName=library/influxdb versioning=semver
 influxdb_version: 2.7.12
 
-influxdb_uid: ''
-influxdb_gid: ''
+influxdb_uid: ""
+influxdb_gid: ""
 
 # The hostname at which InfluxDB is served.
-influxdb_hostname: ''
+influxdb_hostname: ""
 
 influxdb_path_prefix: /
 
@@ -94,7 +94,7 @@ influxdb_container_labels_traefik_additional_response_headers_custom: {}
 # influxdb_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-influxdb_container_labels_additional_labels: ''
+influxdb_container_labels_additional_labels: ""
 
 # Specifies the value of the `X-XSS-Protection` header
 # Stops pages from loading when they detect reflected cross-site scripting (XSS) attacks.
@@ -160,10 +160,10 @@ influxdb_systemd_wanted_services_list_custom: []
 # start of InfluxDB will have no effect.
 # Not setting this will allow you to manually set these by visiting the domain you set in influxdb_hostname after installation.
 influxdb_init: false
-influxdb_init_username: ''
-influxdb_init_password: ''
-influxdb_init_org: ''
-influxdb_init_bucket: ''
+influxdb_init_username: ""
+influxdb_init_password: ""
+influxdb_init_org: ""
+influxdb_init_bucket: ""
 
 # Additional environment variables to pass to the InfluxDB container.
 # You can use this to further influence the default configuration.
@@ -172,4 +172,4 @@ influxdb_init_bucket: ''
 # influxdb_environment_variables_additional_variables: |
 #   INFLUXD_BOLT_PATH=/root/influxdb.bolt
 #   DOCKER_INFLUXDB_INIT_RETENTION=90d
-influxdb_environment_variables_additional_variables: ''
+influxdb_environment_variables_additional_variables: ""
