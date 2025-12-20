@@ -155,6 +155,9 @@ influxdb_systemd_wanted_services_list_default: []
 influxdb_systemd_wanted_services_list_auto: []
 influxdb_systemd_wanted_services_list_custom: []
 
+# Specify the timezone
+influxdb_environment_variables_tz: UTC
+
 # Configure the initial user, organization and bucket
 # This setting will only be used once upon initial installation of influxdb. Changing this values after the first
 # start of InfluxDB will have no effect.
