@@ -56,4 +56,6 @@ traefik.http.routers.{{ influxdb_identifier }}.tls.certResolver={{ influxdb_cont
 traefik.http.services.{{ influxdb_identifier }}.loadbalancer.server.port={{ influxdb_container_http_port }}
 {% endif %}
 
-{{ influxdb_container_labels_additional_labels }}
+{% for arg in influxdb_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}
