@@ -92,7 +92,7 @@ influxdb_container_labels_traefik_additional_response_headers_custom: {}
 # To add your own custom labels, use `influxdb_container_labels_additional_labels_custom`
 #
 # Example:
-# influxdb_container_labels_additional_labels_custom: |
+# influxdb_container_labels_additional_labels_custom:
 #   - my.label=1
 #   - another.label="here"
 influxdb_container_labels_additional_labels: "{{ influxdb_container_labels_additional_labels_auto + influxdb_container_labels_additional_labels_custom }}"
