@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Ensure InfluxDB path exists
+- name: Ensure InfluxDB paths exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -14,15 +14,6 @@
     group: "{{ influxdb_gid }}"
   with_items:
     - "{{ influxdb_base_path }}"
-
-- name: Ensure InfluxDB data path exists
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0750"
-    owner: "{{ influxdb_uid }}"
-    group: "{{ influxdb_gid }}"
-  with_items:
     - "{{ influxdb_data_path }}"
 
 - name: Ensure InfluxDB support files installed
