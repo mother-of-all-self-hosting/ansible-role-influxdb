@@ -9,7 +9,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0700"
+    mode: "0750"
     owner: "{{ influxdb_uid }}"
     group: "{{ influxdb_gid }}"
   with_items:
@@ -19,7 +19,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0755"
+    mode: "0750"
     owner: "{{ influxdb_uid }}"
     group: "{{ influxdb_gid }}"
   with_items:
