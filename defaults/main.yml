@@ -101,6 +101,12 @@ influxdb_container_labels_additional_labels: "{{ influxdb_container_labels_addit
 influxdb_container_labels_additional_labels_auto: []
 influxdb_container_labels_additional_labels_custom: []
 
+# Specify the size of the container's tmpfs volume (/tmp)
+influxdb_container_tmpfs_tmp_size: 128m
+
+# Specify the size of the container's tmpfs volume (/etc/influxdb2)
+influxdb_container_tmpfs_influxdb2_size: 128m
+
 # A list of extra arguments to pass to the container (`docker create` command)
 influxdb_container_extra_arguments: "{{ influxdb_container_extra_arguments_auto + influxdb_container_extra_arguments_custom }}"
 influxdb_container_extra_arguments_auto: []
