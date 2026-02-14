@@ -30,6 +30,7 @@
       community.docker.docker_network:
         name: "{{ influxdb_container_network }}"
         state: absent
+      register: influxdb_network_deletion_result
 
     - name: Ensure InfluxDB container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
@@ -37,8 +38,8 @@
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
           {{ influxdb_container_network }}
-      register: network_deletion_result
-      changed_when: influxdb_container_network in network_deletion_result.stdout
+      register: influxdb_network_deletion_result
+      changed_when: influxdb_container_network in influxdb_network_deletion_result.stdout
 
     - name: Ensure InfluxDB path does not exist
       ansible.builtin.file:
