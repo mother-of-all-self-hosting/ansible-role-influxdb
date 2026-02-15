@@ -39,6 +39,9 @@ influxdb_container_image_force_pull: "{{ influxdb_container_image.endswith(':lat
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 influxdb_container_network: "{{ influxdb_identifier }}"
 
+# Control if the container network is deleted on uninstalling.
+influxdb_container_network_deletion_enabled: true
+
 # Specify how the container publishes its HTTP port (as defined by `influxdb_container_http_port`).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
