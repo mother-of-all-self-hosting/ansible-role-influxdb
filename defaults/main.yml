@@ -226,3 +226,13 @@ influxdb_init_bucket: ""
 #   INFLUXD_BOLT_PATH=/root/influxdb.bolt
 #   DOCKER_INFLUXDB_INIT_RETENTION=90d
 influxdb_environment_variables_additional_variables: ""
+
+# influxdb_restart_necessary controls whether the InfluxDB systemd
+# service will be restarted (when true) or merely started (when false) by the
+# systemd service manager role (when conditional restart is enabled).
+#
+# This value is automatically computed during installation based on whether
+# any configuration files, the systemd service file, or the container image changed.
+# The default of `false` means "no restart needed" — appropriate when the role's
+# installation tasks haven't run (e.g., due to --tags skipping them).
+influxdb_restart_necessary: false
