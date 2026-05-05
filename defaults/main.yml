@@ -34,7 +34,6 @@ influxdb_container_image_tag: "{{ influxdb_version }}"
 influxdb_container_image_registry_prefix: "{{ influxdb_container_image_registry_prefix_upstream }}"
 influxdb_container_image_registry_prefix_upstream: "{{ influxdb_container_image_registry_prefix_upstream_default }}"
 influxdb_container_image_registry_prefix_upstream_default: docker.io/
-influxdb_container_image_force_pull: "{{ influxdb_container_image.endswith(':latest') }}"
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 influxdb_container_network: "{{ influxdb_identifier }}"
