@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+- name: Verify InfluxDB systemd service
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for InfluxDB service to become active (up to 180s)
+      ansible.builtin.systemd:
+        name: influxdb.service
+      register: influxdb_service
+      until: influxdb_service.status.ActiveState == 'active'
+      retries: 36
+      delay: 5
+
+    - name: Assert InfluxDB service is active
+      ansible.builtin.assert:
+        that: influxdb_service.status.ActiveState == 'active'
+        fail_msg: "influxdb.service not active ({{ influxdb_service.status.ActiveState }})"
+        success_msg: "influxdb.service is active"
+
+    - name: Retrieve InfluxDB service log for debugging
+      when: influxdb_debug_service_enabled | bool
+      ansible.builtin.command:
+        cmd: journalctl -xeu influxdb.service
+      changed_when: false
+
+    - name: Wait for InfluxDB HTTP endpoint to respond (up to 10m)
+      ansible.builtin.uri:
+        url: "http://localhost:8086/health"
+        method: GET
+        status_code: [200, 302]
+        follow_redirects: none
+      register: influxdb_endpoint
+      until: influxdb_endpoint.status in [200, 302]
+      retries: 120
+      delay: 5
+
+    - name: Assert InfluxDB HTTP endpoint responds
+      ansible.builtin.assert:
+        that: influxdb_endpoint.status in [200, 302]
+        fail_msg: "InfluxDB did not respond as expected ({{ influxdb_endpoint.status | default('no response') }})"
+        success_msg: "InfluxDB responded with {{ influxdb_endpoint.status }}"
+
+    - name: Show InfluxDB systemd service status summary
+      ansible.builtin.debug:
+        msg:
+          - "InfluxDB systemd: {{ influxdb_service.status.ActiveState }}"
+          - "InfluxDB HTTP: {{ influxdb_endpoint.status }}"
