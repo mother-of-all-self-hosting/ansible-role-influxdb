@@ -47,7 +47,9 @@ Currently there is one testing scenario available.
 
 ### `default`
 
-Tests a standard InfluxDB installation.
+Installs InfluxDB with `influxdb_init` enabled, so that the instance comes up with an organization, a bucket and an admin token, instead of as an empty one that still offers its setup wizard.
+
+The verifier then writes a point through the HTTP API and reads it back through the Flux query API, checks that a setting passed through `influxdb_environment_variables_additional_variables` shaped the created bucket, checks that no Traefik labels are attached while Traefik support is off, and checks that the running server reports the version that `influxdb_version` asks for.
 
 ## Running
 

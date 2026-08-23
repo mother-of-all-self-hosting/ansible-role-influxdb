@@ -31,12 +31,50 @@ provisioner:
         # Helper variables
         influxdb_debug_service_enabled: false
 
+        # The admin token that the initial setup is told to create, instead of
+        # letting InfluxDB generate a random one. The verifier needs to know it
+        # in order to write and read data back, and the fact that it works at
+        # all is what proves that the env file the role templated reached the
+        # process. Kept free of `$$`, which Molecule interpolates as an
+        # environment variable everywhere in this file - comments included,
+        # which is why the character is doubled even here.
+        influxdb_molecule_admin_token: molecule-admin-token
+
         # Variables for InfluxDB
         influxdb_uid: 1000
         influxdb_gid: 1000
         influxdb_hostname: localhost
         influxdb_container_labels_traefik_enabled: false
-        influxdb_container_http_host_bind_port: 8086
+
+        # The role publishes no port by default. Binding to the loopback
+        # address of the test container lets the verifier talk to InfluxDB,
+        # and exercises the port-publishing branch of the systemd unit.
+        influxdb_container_http_host_bind_port: "127.0.0.1:8086"
+
+        # Without this, InfluxDB comes up as a blank instance that still offers
+        # its setup wizard: it has no organization, no bucket and no token, and
+        # rejects every write with a 401 - while still answering `/health` with
+        # `"status": "pass"`. Running the setup is what makes the probes in
+        # verify.yml able to observe a database that actually works.
+        #
+        # It also covers the only branch of the role that writes to
+        # /etc/influxdb2 (see the tmpfs mount in the systemd unit), which is
+        # what broke in "Fix container failing to start when influxdb_init is
+        # enabled".
+        influxdb_init: true
+        influxdb_init_username: molecule
+        influxdb_init_password: molecule-password
+        influxdb_init_org: molecule-org
+        influxdb_init_bucket: molecule-bucket
+
+        # DOCKER_INFLUXDB_INIT_RETENTION is not a value the role knows about,
+        # which is exactly why the verifier looks for it: reading 48h back out
+        # of the created bucket proves that arbitrary settings placed here are
+        # carried into the container, and not just the ones with named
+        # variables of their own.
+        influxdb_environment_variables_additional_variables: |
+          DOCKER_INFLUXDB_INIT_ADMIN_TOKEN={{ influxdb_molecule_admin_token }}
+          DOCKER_INFLUXDB_INIT_RETENTION=48h
   env:
     # Workaround for https://github.com/ansible/molecule/issues/4391
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
@@ -50,7 +88,7 @@ scenario:
     - create
     - prepare
     - converge
-    # Disable idempotence test for now due to due to /influxdb/data being changed every time
+    # Disable idempotence test for now due to /influxdb/data being changed every time
     # - idempotence
     - side_effect
     - verify
