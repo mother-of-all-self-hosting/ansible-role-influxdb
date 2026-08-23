@@ -1,6 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
+    "github>mother-of-all-self-hosting/renovate-config#v1.0.0",
+    "github>mother-of-all-self-hosting/renovate-config//patch-automerge#v1.0.0"
+  ],
+  "packageRules": [
+    {
+      "description": "This role installs InfluxDB OSS v2 and is shaped around it throughout: the DOCKER_INFLUXDB_INIT_* setup variables, the /var/lib/influxdb2 and /etc/influxdb2 paths, and the /api/v2 surface the Molecule scenario probes. InfluxDB 3 Core is a different product rather than an upgrade, and InfluxDB 3 Enterprise is proprietary; see the warning at the top of README.md. The 3.x line currently ships only under -core and -enterprise tags, which semver versioning reads as prereleases and skips, so today nothing keeps Renovate on the 2.x line except that coincidence of tag naming. This says it outright instead.",
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["library/influxdb"],
+      "allowedVersions": "<3"
+    }
   ]
 }
