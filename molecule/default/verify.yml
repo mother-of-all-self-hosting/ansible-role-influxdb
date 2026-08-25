@@ -192,7 +192,7 @@
     # never asked it to serve.
     - name: Inspect the InfluxDB container
       ansible.builtin.command:
-        cmd: "docker inspect {{ influxdb_defaults.influxdb_identifier }}"
+        cmd: "docker container inspect {{ influxdb_defaults.influxdb_identifier }}"
       register: influxdb_inspect
       changed_when: false
 
