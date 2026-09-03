@@ -215,7 +215,7 @@
     # image that cannot initialize, or that is a different product altogether,
     # cannot pass here. InfluxDB reports the version with a leading `v`, which
     # `influxdb_version` does not carry.
-    - name: Assert the running InfluxDB is the version the role asks for
+    - name: Assert the running InfluxDB is the version this role installs
       vars:
         influxdb_expected_version: "v{{ influxdb_defaults.influxdb_version }}"
       ansible.builtin.assert:
