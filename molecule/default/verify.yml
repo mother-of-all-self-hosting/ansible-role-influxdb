@@ -202,11 +202,7 @@
           even though `influxdb_container_labels_traefik_enabled` is false.
         success_msg: "No Traefik labels are attached while Traefik support is off"
 
-    # Tying the running version to `influxdb_version` is what makes this
-    # scenario a real test of the version that Renovate bumps: a bump to an
-    # image that cannot initialize, or that is a different product altogether,
-    # cannot pass here. InfluxDB reports the version with a leading `v`, which
-    # `influxdb_version` does not carry.
+    # InfluxDB reports the version with a leading `v`, which `influxdb_version` does not carry.
     - name: Assert the running InfluxDB is the version this role installs
       vars:
         influxdb_expected_version: "v{{ influxdb_defaults.influxdb_version }}"
