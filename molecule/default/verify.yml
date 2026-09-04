@@ -217,12 +217,12 @@
           but the role asks for {{ influxdb_expected_version }}
         success_msg: "InfluxDB reports version {{ influxdb_health.json.version }}"
 
-    - name: Show InfluxDB verification summary
+    - name: Show the InfluxDB verification summary
       ansible.builtin.debug:
         msg:
           - "InfluxDB systemd: {{ influxdb_service.status.ActiveState }}"
-          - "Health: {{ influxdb_health.json.status }} ({{ influxdb_health.json.version }})"
-          - "Setup still offered: {{ influxdb_setup.json.allowed }}"
-          - "Write: HTTP {{ influxdb_write.status }}"
-          - "Query bytes: {{ influxdb_query.content | length }}"
-          - "Bucket retention (seconds): {{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds }}"
+          - "InfluxDB health: {{ influxdb_health.json.status }} ({{ influxdb_health.json.version }})"
+          - "InfluxDB setup still offered: {{ influxdb_setup.json.allowed }}"
+          - "InfluxDB write: HTTP {{ influxdb_write.status }}"
+          - "InfluxDB query bytes: {{ influxdb_query.content | length }}"
+          - "InfluxDB bucket retention (seconds): {{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds }}"
