@@ -212,10 +212,8 @@
         influxdb_expected_version: "v{{ influxdb_defaults.influxdb_version }}"
       ansible.builtin.assert:
         that: influxdb_health.json.version == influxdb_expected_version
-        fail_msg: >-
-          InfluxDB reports version {{ influxdb_health.json.version | default('none') }},
-          but the role asks for {{ influxdb_expected_version }}
-        success_msg: "InfluxDB reports version {{ influxdb_health.json.version }}"
+        fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_expected_version }}"
+        success_msg: "InfluxDB reports {{ influxdb_health.json.version }}"
 
     - name: Show the InfluxDB verification summary
       ansible.builtin.debug:
