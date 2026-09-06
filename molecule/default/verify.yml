@@ -69,6 +69,14 @@
         fail_msg: "InfluxDB reports health {{ influxdb_health.json.status | default('none') }}"
         success_msg: "InfluxDB reports health {{ influxdb_health.json.status }}"
 
+    # InfluxDB reports its version with a leading `v` (`v2.1.3`), while the
+    # role variable does not carry one.
+    - name: Assert the running InfluxDB is the version this role installs
+      ansible.builtin.assert:
+        that: influxdb_health.json.version | regex_replace('^v', '') == influxdb_defaults.influxdb_version
+        fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_defaults.influxdb_version }}"
+        success_msg: "InfluxDB reports {{ influxdb_health.json.version }}"
+
     # This is the endpoint that tells the two states apart. On an instance that
     # has never been set up it answers `{"allowed": true}`, meaning "the setup
     # wizard is still on offer"; once an organization, bucket and operator
@@ -201,14 +209,6 @@
           The container carries Traefik labels ({{ influxdb_traefik_labels | join(', ') }})
           even though `influxdb_container_labels_traefik_enabled` is false.
         success_msg: "No Traefik labels are attached while Traefik support is off"
-
-    # InfluxDB reports its version with a leading `v` (`v2.1.3`), while the
-    # role variable does not carry one.
-    - name: Assert the running InfluxDB is the version this role installs
-      ansible.builtin.assert:
-        that: influxdb_health.json.version | regex_replace('^v', '') == influxdb_defaults.influxdb_version
-        fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_defaults.influxdb_version }}"
-        success_msg: "InfluxDB reports {{ influxdb_health.json.version }}"
 
     - name: Show the InfluxDB verification summary
       ansible.builtin.debug:
