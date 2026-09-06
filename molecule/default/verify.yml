@@ -202,7 +202,8 @@
           even though `influxdb_container_labels_traefik_enabled` is false.
         success_msg: "No Traefik labels are attached while Traefik support is off"
 
-    # InfluxDB reports the version with a leading `v`, which `influxdb_version` does not carry.
+    # InfluxDB reports its version with a leading `v` (`v2.1.3`), while the
+    # role variable does not carry one.
     - name: Assert the running InfluxDB is the version this role installs
       ansible.builtin.assert:
         that: influxdb_health.json.version | regex_replace('^v', '') == influxdb_defaults.influxdb_version
