@@ -204,18 +204,17 @@
 
     # InfluxDB reports the version with a leading `v`, which `influxdb_version` does not carry.
     - name: Assert the running InfluxDB is the version this role installs
-      vars:
-        influxdb_expected_version: "v{{ influxdb_defaults.influxdb_version }}"
       ansible.builtin.assert:
-        that: influxdb_health.json.version == influxdb_expected_version
-        fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_expected_version }}"
+        that: influxdb_health.json.version | regex_replace('^v', '') == influxdb_defaults.influxdb_version
+        fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_defaults.influxdb_version }}"
         success_msg: "InfluxDB reports {{ influxdb_health.json.version }}"
 
     - name: Show the InfluxDB verification summary
       ansible.builtin.debug:
         msg:
           - "InfluxDB systemd: {{ influxdb_service.status.ActiveState }}"
-          - "InfluxDB health: {{ influxdb_health.json.status }} ({{ influxdb_health.json.version }})"
+          - "InfluxDB version: {{ influxdb_health.json.version }}"
+          - "InfluxDB health: {{ influxdb_health.json.status }}"
           - "InfluxDB setup still offered: {{ influxdb_setup.json.allowed }}"
           - "InfluxDB write: HTTP {{ influxdb_write.status }}"
           - "InfluxDB query bytes: {{ influxdb_query.content | length }}"
