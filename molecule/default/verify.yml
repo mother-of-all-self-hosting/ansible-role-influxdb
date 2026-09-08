@@ -51,7 +51,7 @@
     - name: Retrieve the InfluxDB systemd service log for debugging
       when: influxdb_debug_service_enabled | bool
       ansible.builtin.command:
-        cmd: journalctl -xeu influxdb.service
+        cmd: journalctl --no-pager --output=cat --unit=influxdb.service
       changed_when: false
 
     # A readiness gate, not a functional probe. Running `influxdb:2.9.1` with
