@@ -20,6 +20,8 @@
     influxdb_probe_value: 42
 
   tasks:
+    - name: Verify that InfluxDB works
+      block:
     # The role is not included in this playbook, so its defaults are not in
     # scope. Reading defaults/main.yml directly ties the version assertion
     # below.
@@ -226,3 +228,19 @@
           - "InfluxDB write: HTTP {{ influxdb_write.status }}"
           - "InfluxDB query bytes: {{ influxdb_query.content | length }}"
           - "InfluxDB bucket retention (seconds): {{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds }}"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the InfluxDB systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=influxdb.service
+          register: influxdb_service_log
+          changed_when: false
+
+        - name: Show the InfluxDB systemd service log
+          ansible.builtin.debug:
+            var: influxdb_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "InfluxDB verification failed. The systemd service log is printed above."
