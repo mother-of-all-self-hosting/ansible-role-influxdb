@@ -22,212 +22,212 @@
   tasks:
     - name: Verify that InfluxDB works
       block:
-    # The role is not included in this playbook, so its defaults are not in
-    # scope. Reading defaults/main.yml directly ties the version assertion
-    # below.
-    - name: Load the role defaults
-      ansible.builtin.include_vars:
-        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
-        name: influxdb_defaults
+        # The role is not included in this playbook, so its defaults are not in
+        # scope. Reading defaults/main.yml directly ties the version assertion
+        # below.
+        - name: Load the role defaults
+          ansible.builtin.include_vars:
+            file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+            name: influxdb_defaults
 
-    - name: Wait for the InfluxDB systemd service to become active (up to 180s)
-      ansible.builtin.systemd_service:
-        name: influxdb.service
-      register: influxdb_service
-      until: influxdb_service.status.ActiveState == 'active'
-      retries: 36
-      delay: 5
-      # So that giving up is reported by the assertion below rather than as a
-      # wall of systemd unit properties.
-      failed_when: false
+        - name: Wait for the InfluxDB systemd service to become active (up to 180s)
+          ansible.builtin.systemd_service:
+            name: influxdb.service
+          register: influxdb_service
+          until: influxdb_service.status.ActiveState == 'active'
+          retries: 36
+          delay: 5
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
 
-    # `Restart=always` in the systemd unit means that even a container which crashes
-    # and gets restarted reads as active here, so this is a precondition rather than
-    # a result.
-    - name: Assert the InfluxDB systemd service is active
-      ansible.builtin.assert:
-        that: influxdb_service.status.ActiveState == 'active'
-        fail_msg: "influxdb.service is not active ({{ influxdb_service.status.ActiveState }})"
-        success_msg: "influxdb.service is active"
+        # `Restart=always` in the systemd unit means that even a container which crashes
+        # and gets restarted reads as active here, so this is a precondition rather than
+        # a result.
+        - name: Assert the InfluxDB systemd service is active
+          ansible.builtin.assert:
+            that: influxdb_service.status.ActiveState == 'active'
+            fail_msg: "influxdb.service is not active ({{ influxdb_service.status.ActiveState }})"
+            success_msg: "influxdb.service is active"
 
-    - name: Retrieve the InfluxDB systemd service log for debugging
-      when: influxdb_debug_service_enabled | bool
-      ansible.builtin.command:
-        cmd: journalctl --no-pager --output=cat --unit=influxdb.service
-      changed_when: false
+        - name: Retrieve the InfluxDB systemd service log for debugging
+          when: influxdb_debug_service_enabled | bool
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=influxdb.service
+          changed_when: false
 
-    # A readiness gate, not a functional probe. Running `influxdb:2.9.1` with
-    # no configuration at all - no organization, no bucket, no user, rejecting
-    # every write with a 401 - still answers this endpoint with
-    # `{"status": "pass", "message": "ready for queries and writes"}`. Every
-    # assertion that says something about a *usable* database is below.
-    - name: Wait for the InfluxDB HTTP API to answer /health (up to 10m)
-      ansible.builtin.uri:
-        url: "{{ influxdb_base_url }}/health"
-        method: GET
-        status_code: [200, 404, 500, 503]
-      register: influxdb_health
-      until: influxdb_health.status == 200 and influxdb_health.json.status == 'pass'
-      retries: 120
-      delay: 5
+        # A readiness gate, not a functional probe. Running `influxdb:2.9.1` with
+        # no configuration at all - no organization, no bucket, no user, rejecting
+        # every write with a 401 - still answers this endpoint with
+        # `{"status": "pass", "message": "ready for queries and writes"}`. Every
+        # assertion that says something about a *usable* database is below.
+        - name: Wait for the InfluxDB HTTP API to answer /health (up to 10m)
+          ansible.builtin.uri:
+            url: "{{ influxdb_base_url }}/health"
+            method: GET
+            status_code: [200, 404, 500, 503]
+          register: influxdb_health
+          until: influxdb_health.status == 200 and influxdb_health.json.status == 'pass'
+          retries: 120
+          delay: 5
 
-    - name: Assert the InfluxDB HTTP API reports itself healthy
-      ansible.builtin.assert:
-        that: influxdb_health.json.status == 'pass'
-        fail_msg: "InfluxDB reports health {{ influxdb_health.json.status | default('none') }}"
-        success_msg: "InfluxDB reports health {{ influxdb_health.json.status }}"
+        - name: Assert the InfluxDB HTTP API reports itself healthy
+          ansible.builtin.assert:
+            that: influxdb_health.json.status == 'pass'
+            fail_msg: "InfluxDB reports health {{ influxdb_health.json.status | default('none') }}"
+            success_msg: "InfluxDB reports health {{ influxdb_health.json.status }}"
 
-    # InfluxDB reports its version with a leading `v` (`v2.1.3`), while the
-    # role variable does not carry one.
-    - name: Assert the running InfluxDB is the version this role installs
-      ansible.builtin.assert:
-        that: influxdb_health.json.version | regex_replace('^v', '') == influxdb_defaults.influxdb_version
-        fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_defaults.influxdb_version }}"
-        success_msg: "InfluxDB reports {{ influxdb_health.json.version }}"
+        # InfluxDB reports its version with a leading `v` (`v2.1.3`), while the
+        # role variable does not carry one.
+        - name: Assert the running InfluxDB is the version this role installs
+          ansible.builtin.assert:
+            that: influxdb_health.json.version | regex_replace('^v', '') == influxdb_defaults.influxdb_version
+            fail_msg: "InfluxDB reports {{ influxdb_health.json.version | default('none') }}, expected {{ influxdb_defaults.influxdb_version }}"
+            success_msg: "InfluxDB reports {{ influxdb_health.json.version }}"
 
-    # This is the endpoint that tells the two states apart. On an instance that
-    # has never been set up it answers `{"allowed": true}`, meaning "the setup
-    # wizard is still on offer"; once an organization, bucket and operator
-    # token exist it answers `{"allowed": false}`. `influxdb_init` is what is
-    # supposed to have performed that setup here, via the env file the role
-    # templated, so `true` at this point means the initialization silently did
-    # not happen.
-    - name: Ask InfluxDB whether it still offers its initial setup
-      ansible.builtin.uri:
-        url: "{{ influxdb_base_url }}/api/v2/setup"
-        method: GET
-        status_code: [200, 401, 404]
-      register: influxdb_setup
-      changed_when: false
+        # This is the endpoint that tells the two states apart. On an instance that
+        # has never been set up it answers `{"allowed": true}`, meaning "the setup
+        # wizard is still on offer"; once an organization, bucket and operator
+        # token exist it answers `{"allowed": false}`. `influxdb_init` is what is
+        # supposed to have performed that setup here, via the env file the role
+        # templated, so `true` at this point means the initialization silently did
+        # not happen.
+        - name: Ask InfluxDB whether it still offers its initial setup
+          ansible.builtin.uri:
+            url: "{{ influxdb_base_url }}/api/v2/setup"
+            method: GET
+            status_code: [200, 401, 404]
+          register: influxdb_setup
+          changed_when: false
 
-    - name: Assert InfluxDB has been set up
-      ansible.builtin.assert:
-        that: not influxdb_setup.json.allowed
-        fail_msg: >-
-          InfluxDB still offers its initial setup, so `influxdb_init` did not take effect:
-          the instance has no organization, no bucket and no usable token.
-        success_msg: "InfluxDB no longer offers its initial setup, so it has been initialized"
+        - name: Assert InfluxDB has been set up
+          ansible.builtin.assert:
+            that: not influxdb_setup.json.allowed
+            fail_msg: >-
+              InfluxDB still offers its initial setup, so `influxdb_init` did not take effect:
+              the instance has no organization, no bucket and no usable token.
+            success_msg: "InfluxDB no longer offers its initial setup, so it has been initialized"
 
-    # Writing needs a token, an organization and a bucket, all three of which
-    # only exist because the role wrote them into the env file. A 401 here
-    # means the token in `influxdb_environment_variables_additional_variables`
-    # never reached the process; a 404 means the organization or the bucket
-    # named by `influxdb_init_org` / `influxdb_init_bucket` did not.
-    - name: Write a point into the InfluxDB bucket
-      ansible.builtin.uri:
-        url: "{{ influxdb_base_url }}/api/v2/write?org={{ influxdb_init_org }}&bucket={{ influxdb_init_bucket }}&precision=s"
-        method: POST
-        headers: "{{ influxdb_auth_headers }}"
-        body: "{{ influxdb_probe_measurement }},source=molecule value={{ influxdb_probe_value }}"
-        body_format: raw
-        status_code: [204, 400, 401, 403, 404, 422]
-      register: influxdb_write
-      changed_when: false
+        # Writing needs a token, an organization and a bucket, all three of which
+        # only exist because the role wrote them into the env file. A 401 here
+        # means the token in `influxdb_environment_variables_additional_variables`
+        # never reached the process; a 404 means the organization or the bucket
+        # named by `influxdb_init_org` / `influxdb_init_bucket` did not.
+        - name: Write a point into the InfluxDB bucket
+          ansible.builtin.uri:
+            url: "{{ influxdb_base_url }}/api/v2/write?org={{ influxdb_init_org }}&bucket={{ influxdb_init_bucket }}&precision=s"
+            method: POST
+            headers: "{{ influxdb_auth_headers }}"
+            body: "{{ influxdb_probe_measurement }},source=molecule value={{ influxdb_probe_value }}"
+            body_format: raw
+            status_code: [204, 400, 401, 403, 404, 422]
+          register: influxdb_write
+          changed_when: false
 
-    - name: Assert the point was accepted
-      ansible.builtin.assert:
-        that: influxdb_write.status == 204
-        fail_msg: >-
-          InfluxDB refused the write with HTTP {{ influxdb_write.status }}, so the credentials
-          or the organization/bucket that the role configured are not what the server has.
-        success_msg: "InfluxDB accepted a write into the {{ influxdb_init_bucket }} bucket"
+        - name: Assert the point was accepted
+          ansible.builtin.assert:
+            that: influxdb_write.status == 204
+            fail_msg: >-
+              InfluxDB refused the write with HTTP {{ influxdb_write.status }}, so the credentials
+              or the organization/bucket that the role configured are not what the server has.
+            success_msg: "InfluxDB accepted a write into the {{ influxdb_init_bucket }} bucket"
 
-    # Accepting a write is not the same as storing one. Reading the point back
-    # through the Flux query engine exercises the other half of the database
-    # and proves that the value survived the trip.
-    - name: Query the point back out of InfluxDB
-      ansible.builtin.uri:
-        url: "{{ influxdb_base_url }}/api/v2/query?org={{ influxdb_init_org }}"
-        method: POST
-        headers: "{{ influxdb_auth_headers | combine({'Content-Type': 'application/vnd.flux', 'Accept': 'application/csv'}) }}"
-        body: >-
-          from(bucket:"{{ influxdb_init_bucket }}")
-          |> range(start:-1h)
-          |> filter(fn:(r) => r._measurement == "{{ influxdb_probe_measurement }}")
-        body_format: raw
-        return_content: true
-        status_code: [200, 400, 401, 403, 404]
-      register: influxdb_query
-      changed_when: false
+        # Accepting a write is not the same as storing one. Reading the point back
+        # through the Flux query engine exercises the other half of the database
+        # and proves that the value survived the trip.
+        - name: Query the point back out of InfluxDB
+          ansible.builtin.uri:
+            url: "{{ influxdb_base_url }}/api/v2/query?org={{ influxdb_init_org }}"
+            method: POST
+            headers: "{{ influxdb_auth_headers | combine({'Content-Type': 'application/vnd.flux', 'Accept': 'application/csv'}) }}"
+            body: >-
+              from(bucket:"{{ influxdb_init_bucket }}")
+              |> range(start:-1h)
+              |> filter(fn:(r) => r._measurement == "{{ influxdb_probe_measurement }}")
+            body_format: raw
+            return_content: true
+            status_code: [200, 400, 401, 403, 404]
+          register: influxdb_query
+          changed_when: false
 
-    # The CSV rows carry the measurement name and the value in separate
-    # columns, so both are looked for as plain substrings rather than as a
-    # pattern - `in` rather than `is search`, which would treat these as
-    # regular expressions.
-    - name: Assert the point read back is the one that was written
-      ansible.builtin.assert:
-        that:
-          - influxdb_query.status == 200
-          - influxdb_probe_measurement in influxdb_query.content
-          - (influxdb_probe_value | string) in influxdb_query.content
-        fail_msg: >-
-          Querying {{ influxdb_probe_measurement }} back out of InfluxDB did not return it
-          (HTTP {{ influxdb_query.status }}): {{ influxdb_query.content | default('no output') | trim }}
-        success_msg: "The point written to InfluxDB reads back through the Flux query API"
+        # The CSV rows carry the measurement name and the value in separate
+        # columns, so both are looked for as plain substrings rather than as a
+        # pattern - `in` rather than `is search`, which would treat these as
+        # regular expressions.
+        - name: Assert the point read back is the one that was written
+          ansible.builtin.assert:
+            that:
+              - influxdb_query.status == 200
+              - influxdb_probe_measurement in influxdb_query.content
+              - (influxdb_probe_value | string) in influxdb_query.content
+            fail_msg: >-
+              Querying {{ influxdb_probe_measurement }} back out of InfluxDB did not return it
+              (HTTP {{ influxdb_query.status }}): {{ influxdb_query.content | default('no output') | trim }}
+            success_msg: "The point written to InfluxDB reads back through the Flux query API"
 
-    # DOCKER_INFLUXDB_INIT_RETENTION is not a setting the role has a variable
-    # for - the scenario passes it through
-    # `influxdb_environment_variables_additional_variables`. Finding its effect
-    # in the created bucket is what proves that the env file the role templates
-    # is read as configuration, and not merely as a place credentials happen to
-    # travel. 48h is 172800 seconds.
-    - name: Read the InfluxDB bucket back
-      ansible.builtin.uri:
-        url: "{{ influxdb_base_url }}/api/v2/buckets?name={{ influxdb_init_bucket }}"
-        method: GET
-        headers: "{{ influxdb_auth_headers }}"
-        status_code: [200, 401, 403, 404]
-      register: influxdb_bucket
-      changed_when: false
+        # DOCKER_INFLUXDB_INIT_RETENTION is not a setting the role has a variable
+        # for - the scenario passes it through
+        # `influxdb_environment_variables_additional_variables`. Finding its effect
+        # in the created bucket is what proves that the env file the role templates
+        # is read as configuration, and not merely as a place credentials happen to
+        # travel. 48h is 172800 seconds.
+        - name: Read the InfluxDB bucket back
+          ansible.builtin.uri:
+            url: "{{ influxdb_base_url }}/api/v2/buckets?name={{ influxdb_init_bucket }}"
+            method: GET
+            headers: "{{ influxdb_auth_headers }}"
+            status_code: [200, 401, 403, 404]
+          register: influxdb_bucket
+          changed_when: false
 
-    - name: Assert the retention from the templated env file is in effect
-      vars:
-        influxdb_bucket_retention_seconds: "{{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds | default(0) }}"
-      ansible.builtin.assert:
-        that: influxdb_bucket_retention_seconds | int == 172800
-        fail_msg: >-
-          The {{ influxdb_init_bucket }} bucket retains data for
-          {{ influxdb_bucket_retention_seconds }} seconds rather than the 172800 (48h) that
-          `influxdb_environment_variables_additional_variables` asks for, so that file is not
-          reaching InfluxDB as configuration.
-        success_msg: "The bucket retention of 48h from the templated env file is in effect"
+        - name: Assert the retention from the templated env file is in effect
+          vars:
+            influxdb_bucket_retention_seconds: "{{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds | default(0) }}"
+          ansible.builtin.assert:
+            that: influxdb_bucket_retention_seconds | int == 172800
+            fail_msg: >-
+              The {{ influxdb_init_bucket }} bucket retains data for
+              {{ influxdb_bucket_retention_seconds }} seconds rather than the 172800 (48h) that
+              `influxdb_environment_variables_additional_variables` asks for, so that file is not
+              reaching InfluxDB as configuration.
+            success_msg: "The bucket retention of 48h from the templated env file is in effect"
 
-    # `influxdb_container_labels_traefik_enabled` is false in this scenario, so
-    # the container must carry no Traefik labels at all. Emitting the router
-    # and service labels regardless of that flag is a mistake other roles in
-    # this fleet have made, and it stays invisible until a Traefik instance
-    # running with `exposedByDefault=true` picks up a hostname the operator
-    # never asked it to serve.
-    - name: Inspect the InfluxDB container
-      ansible.builtin.command:
-        cmd: "docker container inspect {{ influxdb_defaults.influxdb_identifier }}"
-      register: influxdb_inspect
-      changed_when: false
+        # `influxdb_container_labels_traefik_enabled` is false in this scenario, so
+        # the container must carry no Traefik labels at all. Emitting the router
+        # and service labels regardless of that flag is a mistake other roles in
+        # this fleet have made, and it stays invisible until a Traefik instance
+        # running with `exposedByDefault=true` picks up a hostname the operator
+        # never asked it to serve.
+        - name: Inspect the InfluxDB container
+          ansible.builtin.command:
+            cmd: "docker container inspect {{ influxdb_defaults.influxdb_identifier }}"
+          register: influxdb_inspect
+          changed_when: false
 
-    - name: Assert no Traefik labels are attached while Traefik support is off
-      vars:
-        influxdb_traefik_labels: >-
-          {{
-            ((influxdb_inspect.stdout | from_json)[0].Config.Labels | default({}, true)).keys()
-            | list | select('search', '^traefik[.]') | list
-          }}
-      ansible.builtin.assert:
-        that: influxdb_traefik_labels | length == 0
-        fail_msg: >-
-          The container carries Traefik labels ({{ influxdb_traefik_labels | join(', ') }})
-          even though `influxdb_container_labels_traefik_enabled` is false.
-        success_msg: "No Traefik labels are attached while Traefik support is off"
+        - name: Assert no Traefik labels are attached while Traefik support is off
+          vars:
+            influxdb_traefik_labels: >-
+              {{
+                ((influxdb_inspect.stdout | from_json)[0].Config.Labels | default({}, true)).keys()
+                | list | select('search', '^traefik[.]') | list
+              }}
+          ansible.builtin.assert:
+            that: influxdb_traefik_labels | length == 0
+            fail_msg: >-
+              The container carries Traefik labels ({{ influxdb_traefik_labels | join(', ') }})
+              even though `influxdb_container_labels_traefik_enabled` is false.
+            success_msg: "No Traefik labels are attached while Traefik support is off"
 
-    - name: Show the InfluxDB verification summary
-      ansible.builtin.debug:
-        msg:
-          - "InfluxDB systemd: {{ influxdb_service.status.ActiveState }}"
-          - "InfluxDB version: {{ influxdb_health.json.version }}"
-          - "InfluxDB health: {{ influxdb_health.json.status }}"
-          - "InfluxDB setup still offered: {{ influxdb_setup.json.allowed }}"
-          - "InfluxDB write: HTTP {{ influxdb_write.status }}"
-          - "InfluxDB query bytes: {{ influxdb_query.content | length }}"
-          - "InfluxDB bucket retention (seconds): {{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds }}"
+        - name: Show the InfluxDB verification summary
+          ansible.builtin.debug:
+            msg:
+              - "InfluxDB systemd: {{ influxdb_service.status.ActiveState }}"
+              - "InfluxDB version: {{ influxdb_health.json.version }}"
+              - "InfluxDB health: {{ influxdb_health.json.status }}"
+              - "InfluxDB setup still offered: {{ influxdb_setup.json.allowed }}"
+              - "InfluxDB write: HTTP {{ influxdb_write.status }}"
+              - "InfluxDB query bytes: {{ influxdb_query.content | length }}"
+              - "InfluxDB bucket retention (seconds): {{ influxdb_bucket.json.buckets[0].retentionRules[0].everySeconds }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
