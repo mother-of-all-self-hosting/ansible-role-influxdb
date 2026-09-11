@@ -19,6 +19,9 @@
     influxdb_probe_measurement: molecule_probe
     influxdb_probe_value: 42
 
+    influxdb_verify_units:
+      - influxdb.service
+
   tasks:
     - name: Verify that InfluxDB works
       block:
@@ -30,13 +33,14 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: influxdb_defaults
 
-        - name: Wait for the InfluxDB systemd service to become active (up to 180s)
+        - name: Wait for the InfluxDB systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: influxdb.service
-          register: influxdb_service
-          until: influxdb_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: influxdb_services
+          until: influxdb_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ influxdb_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -44,17 +48,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the InfluxDB systemd service is active
+        - name: Assert the InfluxDB systemd services are active
           ansible.builtin.assert:
-            that: influxdb_service.status.ActiveState == 'active'
-            fail_msg: "influxdb.service is not active ({{ influxdb_service.status.ActiveState }})"
-            success_msg: "influxdb.service is active"
+            that: influxdb_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(influxdb_verify_units | zip(influxdb_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the InfluxDB systemd service log for debugging
+        - name: Retrieve the InfluxDB systemd services log for debugging
           when: influxdb_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=influxdb.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ influxdb_verify_units }}"
 
         # A readiness gate, not a functional probe. Running `influxdb:2.9.1` with
         # no configuration at all - no organization, no bucket, no user, rejecting
@@ -221,7 +228,7 @@
         - name: Show the InfluxDB verification summary
           ansible.builtin.debug:
             msg:
-              - "InfluxDB systemd: {{ influxdb_service.status.ActiveState }}"
+              - "InfluxDB systemd: {% for unit, state in influxdb_verify_units | zip(influxdb_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "InfluxDB version: {{ influxdb_health.json.version }}"
               - "InfluxDB health: {{ influxdb_health.json.status }}"
               - "InfluxDB setup still offered: {{ influxdb_setup.json.allowed }}"
