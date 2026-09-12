@@ -68,21 +68,24 @@
         # every write with a 401 - still answers this endpoint with
         # `{"status": "pass", "message": "ready for queries and writes"}`. Every
         # assertion that says something about a *usable* database is below.
-        - name: Wait for the InfluxDB HTTP API to answer /health (up to 10m)
+        - name: Wait for InfluxDB to report itself healthy (up to 180s)
           ansible.builtin.uri:
             url: "{{ influxdb_base_url }}/health"
             method: GET
             status_code: [200, 404, 500, 503]
           register: influxdb_health
           until: influxdb_health.status == 200 and influxdb_health.json.status == 'pass'
-          retries: 120
+          retries: 36
           delay: 5
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
 
-        - name: Assert the InfluxDB HTTP API reports itself healthy
+        - name: Assert InfluxDB reports itself healthy
           ansible.builtin.assert:
             that: influxdb_health.json.status == 'pass'
-            fail_msg: "InfluxDB reports health {{ influxdb_health.json.status | default('none') }}"
-            success_msg: "InfluxDB reports health {{ influxdb_health.json.status }}"
+            fail_msg: "InfluxDB did not report itself healthy: {{ influxdb_health.json.status | default('no response') }}"
+            success_msg: "InfluxDB reports itself healthy"
 
         # InfluxDB reports its version with a leading `v` (`v2.1.3`), while the
         # role variable does not carry one.
