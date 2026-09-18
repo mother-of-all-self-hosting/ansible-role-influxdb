@@ -45,7 +45,10 @@ ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} create \
       {% for arg in influxdb_container_extra_arguments %}
       {{ arg }} \
       {% endfor %}
-      {{ influxdb_container_image }}
+      {{ influxdb_container_image }} \
+      {% for arg in influxdb_process_extra_arguments %}
+      {{ arg }} \
+      {% endfor %}
 
 {% for network in influxdb_container_additional_networks %}
 ExecStartPre={{ devture_systemd_docker_base_host_command_docker }} network connect {{ network }} {{ influxdb_identifier }}
