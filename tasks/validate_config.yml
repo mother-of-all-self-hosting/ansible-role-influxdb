@@ -23,7 +23,6 @@
   with_items:
     - influxdb_uid
     - influxdb_gid
-    - influxdb_container_network
 
 - name: Fail when not all initial settings are missing
   ansible.builtin.fail:
