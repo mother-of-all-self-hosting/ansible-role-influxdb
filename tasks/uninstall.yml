@@ -26,7 +26,7 @@
         state: absent
 
     - name: Ensure InfluxDB container network does not exist
-      when: influxdb_container_network_deletion_enabled
+      when: influxdb_container_network_deletion_enabled and influxdb_container_network != 'host'
       block:
         - name: Ensure InfluxDB container network does not exist via community.docker.docker_network
           when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
